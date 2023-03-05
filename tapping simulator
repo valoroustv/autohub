@@ -1,0 +1,392 @@
+    local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+    local Window = OrionLib:MakeWindow({Name = "Autobot Hub | [⌛] Tapping Simulator! 🐾", HidePremium = false, IntroEnabled = false, IntroText = "Auto Hub", SaveConfig = true, ConfigFolder = "Autobot"})
+    
+    -- Values
+    getgenv().autoTap = true
+    getgenv().autoRebirth = true    
+    getgenv().autoEgg = true
+    getgenv().autoIslands = true
+    getgenv().selectEgg = "Starter Egg"
+    getgenv().selectRebirths = "1"
+    getgenv().infiniteJumpEnabled = true
+
+
+    -- Functions
+
+    function autoTap() 
+        while getgenv().autoTap == true do
+            game:GetService("ReplicatedStorage").Events.Tap:FireServer("Main")
+            task.wait()
+        end
+        end
+
+    function autoRebirth()
+        while getgenv().autoRebirth == true do
+            game:GetService("ReplicatedStorage").Events.Rebirth:FireServer(getgenv().selectRebirths,1)
+            task.wait()
+        end
+        end
+
+        function autoEgg()
+            while getgenv().autoEgg == true do
+                game:GetService("ReplicatedStorage").Events.HatchEgg:InvokeServer({},getgenv().selectEgg,1)
+                task.wait()
+            end
+            end
+
+
+            function walkSpeed(speed)
+                game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = speed
+            end
+
+
+            function teleportTo(player)    
+                local localPlayer = game.Players.LocalPlayer
+                localPlayer.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame  
+                wait()        
+            end
+
+            function teleportLocalPlayerBypass(speed)
+                if speed == 0 then clickTpBypassEnabled = false return end
+                clickTpBypassEnabled = true
+            
+                local bodyVelocityEnabled = true
+                local UserInputService = game:GetService("UserInputService")
+                local localPlayer = game.Players.LocalPlayer
+                local mouse = localPlayer:GetMouse()
+                local TweenService = game:GetService("TweenService")
+            
+                function toPosition(position)
+                    local character = localPlayer.Character
+                    if character then
+                        local humanoidRootPart = character.HumanoidRootPart
+                        local distance = (humanoidRootPart.Position - mouse.Hit.p).magnitude
+                        local tweenSpeed = distance / speed
+                        local tweenInfo = TweenInfo.new(tweenSpeed, Enum.EasingStyle.Linear)
+                        local tweenProperties = {CFrame = CFrame.new(position)}
+                        TweenService:Create(humanoidRootPart, tweenInfo, tweenProperties):Play()
+                        if bodyVelocityEnabled then
+                            local bodyVelocity = Instance.new("BodyVelocity")
+                            bodyVelocity.Parent = humanoidRootPart
+                            bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+                            wait(tweenSpeed)
+                            bodyVelocity:Destroy()
+                        end
+                    end
+                end
+                UserInputService.InputBegan:Connect(function(input)
+                    if clickTpBypassEnabled and input.UserInputType == Enum.UserInputType.MouseButton1 and UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+                        local position = mouse.Hit.p
+                        toPosition(position)
+                    end
+                end)    
+            end
+            
+            function teleportLocalPlayer(input)
+                local Player = game.Players.LocalPlayer
+                local Mouse = Player:GetMouse()
+                local UIS = game:GetService("UserInputService")
+                if clickTpEnabled and input.UserInputType == Enum.UserInputType.MouseButton1 and UIS:IsKeyDown(Enum.KeyCode.LeftControl) then
+                   local Char = Player.Character
+                   if Char then
+                      Char:MoveTo(Mouse.Hit.p)
+                   end
+                end
+             end
+
+
+             function noClip()
+                local player = game.Players.LocalPlayer
+                local character = player.Character or player.CharacterAdded:Wait()
+                local rootPart = character:FindFirstChild("HumanoidRootPart") or character.PrimaryPart
+            
+                local function isDescendantOfTerrain(part)
+                    local terrain = game.Workspace.Terrain
+                    return terrain and terrain:IsAncestorOf(part)
+                end
+            
+                game:GetService("RunService").Stepped:Connect(function()
+                    if noClipEnabled then
+                        for _, part in ipairs(character:GetDescendants()) do
+                            if part:IsA("BasePart") and not isDescendantOfTerrain(part) then
+                                part.CanCollide = false
+                            end
+                        end
+                    end
+                end)
+            end 
+
+
+
+            function infiniteJump()
+                task.spawn(function()
+                    local character = game.Players.LocalPlayer.Character
+                    local humanoid = character:FindFirstChild("Humanoid")
+                    while true do
+                        if not infiniteJumpEnabled then break end
+                        if humanoid.Jump and humanoid.FloorMaterial == Enum.Material.Air then
+                            humanoid.JumpPower = 50
+                            humanoid:ChangeState("Jumping")
+                        end
+                        wait()
+                    end
+                end)
+            end
+
+
+    -- Tabs
+    local FarmTab = Window:MakeTab({
+        Name = "Autofarm",
+        PremiumOnly = false
+    })
+
+    local EggsTab = Window:MakeTab({
+        Name = "Eggs",
+        PremiumOnly = false
+    })
+
+    local PlayerTab = Window:MakeTab({
+        Name = "Player",
+        PremiumOnly = false
+    })
+
+    local TeleportTab = Window:MakeTab({
+        Name = "Teleport",
+        PremiumOnly = false
+    })
+    
+    -- Toggles
+    FarmTab:AddToggle({
+        Name = "Auto Tap",
+        Default = false,
+        Callback = function(Value)
+            getgenv().autoTap = Value
+            autoTap()
+        end    
+    })
+
+        FarmTab:AddToggle({
+            Name = "Auto Rebirth",
+            Default = false,
+            Callback = function(Value)
+                getgenv().autoRebirth = Value
+                autoRebirth()
+            end    
+    })
+
+    EggsTab:AddToggle({
+        Name = "Auto Hatch",
+        Default = false,
+        Callback = function(Value)
+            getgenv().autoEgg = Value
+            autoEgg()
+        end    
+
+    })
+
+
+    PlayerTab:AddToggle({
+        Name = "Control Click Teleport",
+        Callback = function(Value)
+            clickTpEnabled = Value
+            game:GetService("UserInputService").InputBegan:Connect(teleportLocalPlayer)
+          end    
+    })
+
+    PlayerTab:AddToggle({
+        Name = "No Clip",
+        Callback = function(Value)
+            noClipEnabled = Value
+            noClip()
+          end    
+    })
+
+
+    PlayerTab:AddToggle({
+        Name = "Infinite Jump",
+        Callback = function()
+            infiniteJumpEnabled = not infiniteJumpEnabled
+            infiniteJump()
+          end    
+    })
+
+
+
+
+
+
+    -- DropDowns
+    FarmTab:AddDropdown({
+        Name = "Rebirths",
+        Default = "1",
+        Options = {"1", "5", "10", "20", "100", "500", "4000", "13500", "32000", "62500", "75000", "100008", "125000", "171500", "256000", "364500", "500000", "750000", "1000000", "2000000", "1000000000", "1000000000000", "100000000000000", "100000000000000000" },
+        Callback = function(Value)
+            getgenv().selectRebirths = Value
+        end    
+    })
+    
+
+    EggsTab:AddDropdown({
+        Name = "Select Egg",
+        Default = "Starter Egg",
+        Options = {"Starter", "Wood Egg", "Jungle Egg", "Forest Egg", "Bee Egg", "Swamp Egg", "Snow Egg", "Desert Egg", "Death Egg", "Beach Egg", "Mine Egg", "Cloud Egg", "Coral Egg", "Dark Egg", "Deep Flamed Egg", "80M Egg"},
+        Callback = function(Value)
+            getgenv().selectEgg = Value
+        end    
+    })
+
+
+
+
+
+
+
+    -- Buttons
+
+    TeleportTab:AddButton({
+        Name = "Go to Spawn",
+        Callback = function()
+        game:GetService("ReplicatedStorage").Events.Teleport:FireServer(CFrame.new(-292.965424, 23.2814751, -423.599396, 0.087131694, 0, -0.996196806, 0, 1, 0, 0.996196806, 0, 0.087131694))
+        end
+    })
+
+
+    TeleportTab:AddButton({
+        Name = "Go To Forest Island",
+        Callback = function()
+        game:GetService("ReplicatedStorage").Events.Teleport:FireServer(CFrame.new(-163.984467, 987.596497, -403.339417, 1, 0, 0, 0, 1, 0, 0, 0, 1)) 
+        end    
+    })
+
+
+    TeleportTab:AddButton({
+        Name = "Go To Flower Island",
+        Callback = function()
+        game:GetService("ReplicatedStorage").Events.Teleport:FireServer(CFrame.new(-179.51564, 1524.63098, -682.498718, -1, 0, -0, -0, 1, -0, -0, 0, -1))
+        end    
+    })
+
+
+    TeleportTab:AddButton({
+        Name = "Go To Swamp Island",
+        Callback = function()
+        game:GetService("ReplicatedStorage").Events.Teleport:FireServer(CFrame.new(-264.358887, 2123.06299, -694.661316, -1, 0, -0, -0, 1, -0, -0, 0, -1))
+        end    
+    })
+
+    TeleportTab:AddButton({
+        Name = "Go To Snow Island",
+        Callback = function()
+        game:GetService("ReplicatedStorage").Events.Teleport:FireServer(CFrame.new(-201.771973, 2944.48169, -470.408752, 0, 0, 1, 0, 1, 0, -1, 0, 0))
+        end    
+    })
+
+
+    TeleportTab:AddButton({
+        Name = "Go To Desert Island",
+        Callback = function()
+        game:GetService("ReplicatedStorage").Events.Teleport:FireServer(CFrame.new(-166.285156, 4235.38916, -779.153137, 0, 0, 1, 0, 1, 0, -1, 0, 0))
+        end    
+    })
+
+
+
+    TeleportTab:AddButton({
+        Name = "Go To Death Island",
+        Callback = function()
+        game:GetService("ReplicatedStorage").Events.Teleport:FireServer(CFrame.new(-276.201263, 5425.62158, -480.287781, 0, 0, 1, 0, 1, 0, -1, 0, 0))
+        end    
+    })
+
+    TeleportTab:AddButton({
+        Name = "Go To Beach Island",
+        Callback = function()
+        game:GetService("ReplicatedStorage").Events.Teleport:FireServer(CFrame.new(-140.345093, 6881.63086, -495.682129, 0, 0, 1, 0, 1, 0, -1, 0, 0))
+        end    
+    })
+
+    TeleportTab:AddButton({
+        Name = "Go To Mines Island",
+        Callback = function()
+        game:GetService("ReplicatedStorage").Events.Teleport:FireServer(CFrame.new(-243.258667, 8376.5166, -483.889771, 0, 0, 1, 0, 1, 0, -1, 0, 0))
+        end    
+    })
+
+    TeleportTab:AddButton({
+        Name = "Go To Cloud Island",
+        Callback = function()
+        game:GetService("ReplicatedStorage").Events.Teleport:FireServer(CFrame.new(-253.303482, 11262.8818, -237.888596, 0, 0, 1, 0, 1, 0, -1, 0, 0))
+        end    
+    })
+
+
+    TeleportTab:AddButton({
+        Name = "Go To Coral Island",
+        Callback = function()
+        game:GetService("ReplicatedStorage").Events.Teleport:FireServer(CFrame.new(-511.021118, 13812.0322, -543.241821, 0, 0, -1, 0, 1, -0, 1, 0, -0))
+        end    
+    })
+
+
+    TeleportTab:AddButton({
+        Name = "Go To Darkheart Island",
+        Callback = function()
+            game:GetService("ReplicatedStorage").Events.Teleport:FireServer(CFrame.new(-408.69751, 17180.1387, -552.046448, 0, 0, 1, 0, 1, 0, -1, 0, 0))
+        end    
+    })
+
+
+
+
+    TeleportTab:AddButton({
+        Name = "Go to Flamelands Island",
+        Callback = function()
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(1431.07068, 26080.3281, -10758.7305, -0.47990647, -3.76953846e-09, -0.877319634, 1.68049699e-10, 1, -4.38857928e-09, 0.877319634, -2.25354091e-09, -0.47990647)
+        end
+    })
+
+
+
+    -- Sliders
+    PlayerTab:AddSlider({
+        Name = "Speed",
+        Min = 32,
+        Max = 600,
+        Default = 32,
+        Color = Color3.fromRGB(64,64,64),
+        Increment = 1,
+        ValueName = "Walk Speed",
+        Callback = function(Value)
+            walkSpeed(Value)
+        end   
+    })
+
+    local Section = PlayerTab:AddSection({
+        Name = "Gravity"
+    })
+
+    PlayerTab:AddSlider({
+        Name = "Gravity Changer",
+        Min = 0,
+        Max = 500,
+        Default = 196,
+        Color = Color3.fromRGB(64,64,64),
+        Increment = 1,
+        ValueName = "Gravity",
+        Callback = function(Value)
+            game.Workspace.Gravity = Value
+        end    
+    })
+
+    PlayerTab:AddButton({
+        Name = "Reset Gravity",
+        Callback = function()
+            game.Workspace.Gravity = 196
+          end    
+    })
+
+
+    
+    end     
+    OrionLib:Init()
