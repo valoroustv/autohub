@@ -1,245 +1,259 @@
 
 
-    local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
-    local Window = OrionLib:MakeWindow({Name = "Autobot Hub | Tower of Hell", HidePremium = false, IntroEnabled = false, IntroText = "Auto Hub", SaveConfig = true, ConfigFolder = "Autobot"})
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local Window = OrionLib:MakeWindow({Name = "Autobot Hub | Tower of Hell", HidePremium = false, IntroEnabled = false, IntroText = "Auto Hub", SaveConfig = true, ConfigFolder = "Autobot"})
 
 
 
-    -- Values
-    getgenv().clickTpEnabled = true
-    getgenv().clickTpBypassEnabled = true
-    getgenv().noClipEnabled = true
-    getgenv().autoFarm = false
+-- Values
+getgenv().clickTpEnabled = true
+getgenv().clickTpBypassEnabled = true
+getgenv().noClipEnabled = true
+getgenv().autoFarm = false
 
-    -- Functions
-    function walkSpeed(speed)
-        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = speed
-    end
+-- Functions
 
 
-    function autoFarm()
-        while getgenv().autoFarm == true do
-        game.Players.LocalPlayer.Character:PivotTo(workspace.tower.finishes.Finish:GetPivot())
-        wait(0.99999)
-    end
-  
 
-    function teleportTo(player)    
-        local localPlayer = game.Players.LocalPlayer
-        localPlayer.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame  
-        wait()        
-    end
-    
+function walkSpeed(speed)   
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = speed
 end
 
-    function teleportLocalPlayerBypass(speed)
-        if speed == 0 then clickTpBypassEnabled = false return end
-        clickTpBypassEnabled = true
-    
-        local bodyVelocityEnabled = true
-        local UserInputService = game:GetService("UserInputService")
-        local localPlayer = game.Players.LocalPlayer
-        local mouse = localPlayer:GetMouse()
-        local TweenService = game:GetService("TweenService")
-    
-        function toPosition(position)
-            local character = localPlayer.Character
-            if character then
-                local humanoidRootPart = character.HumanoidRootPart
-                local distance = (humanoidRootPart.Position - mouse.Hit.p).magnitude
-                local tweenSpeed = distance / speed
-                local tweenInfo = TweenInfo.new(tweenSpeed, Enum.EasingStyle.Linear)
-                local tweenProperties = {CFrame = CFrame.new(position)}
-                TweenService:Create(humanoidRootPart, tweenInfo, tweenProperties):Play()
-                if bodyVelocityEnabled then
-                    local bodyVelocity = Instance.new("BodyVelocity")
-                    bodyVelocity.Parent = humanoidRootPart
-                    bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-                    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-                    wait(tweenSpeed)
-                    bodyVelocity:Destroy()
+
+function autoFarm()
+    while getgenv().autoFarm == true do
+    game.Players.LocalPlayer.Character:PivotTo(workspace.tower.finishes.Finish:GetPivot())
+    wait(0.99999)
+end
+
+
+function teleportTo(player)    
+    local localPlayer = game.Players.LocalPlayer
+    localPlayer.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame  
+    wait()        
+end
+
+end
+
+function teleportLocalPlayerBypass(speed)
+    if speed == 0 then clickTpBypassEnabled = false return end
+    clickTpBypassEnabled = true
+
+    local bodyVelocityEnabled = true
+    local UserInputService = game:GetService("UserInputService")
+    local localPlayer = game.Players.LocalPlayer
+    local mouse = localPlayer:GetMouse()
+    local TweenService = game:GetService("TweenService")
+
+    function toPosition(position)
+        local character = localPlayer.Character
+        if character then
+            local humanoidRootPart = character.HumanoidRootPart
+            local distance = (humanoidRootPart.Position - mouse.Hit.p).magnitude
+            local tweenSpeed = distance / speed
+            local tweenInfo = TweenInfo.new(tweenSpeed, Enum.EasingStyle.Linear)
+            local tweenProperties = {CFrame = CFrame.new(position)}
+            TweenService:Create(humanoidRootPart, tweenInfo, tweenProperties):Play()
+            if bodyVelocityEnabled then
+                local bodyVelocity = Instance.new("BodyVelocity")
+                bodyVelocity.Parent = humanoidRootPart
+                bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+                wait(tweenSpeed)
+                bodyVelocity:Destroy()
+            end
+        end
+    end
+    UserInputService.InputBegan:Connect(function(input)
+        if clickTpBypassEnabled and input.UserInputType == Enum.UserInputType.MouseButton1 and UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+            local position = mouse.Hit.p
+            toPosition(position)
+        end
+    end)    
+end
+
+function teleportLocalPlayer(input)
+    local Player = game.Players.LocalPlayer
+    local Mouse = Player:GetMouse()
+    local UIS = game:GetService("UserInputService")
+    if clickTpEnabled and input.UserInputType == Enum.UserInputType.MouseButton1 and UIS:IsKeyDown(Enum.KeyCode.LeftControl) then
+       local Char = Player.Character
+       if Char then
+          Char:MoveTo(Mouse.Hit.p)
+       end
+    end
+ end
+
+
+ function noClip()
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local rootPart = character:FindFirstChild("HumanoidRootPart") or character.PrimaryPart
+
+    local function isDescendantOfTerrain(part)
+        local terrain = game.Workspace.Terrain
+        return terrain and terrain:IsAncestorOf(part)
+    end
+
+    game:GetService("RunService").Stepped:Connect(function()
+        if noClipEnabled then
+            for _, part in ipairs(character:GetDescendants()) do
+                if part:IsA("BasePart") and not isDescendantOfTerrain(part) then
+                    part.CanCollide = false
                 end
             end
         end
-        UserInputService.InputBegan:Connect(function(input)
-            if clickTpBypassEnabled and input.UserInputType == Enum.UserInputType.MouseButton1 and UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
-                local position = mouse.Hit.p
-                toPosition(position)
-            end
-        end)    
-    end
-    
-    function teleportLocalPlayer(input)
-        local Player = game.Players.LocalPlayer
-        local Mouse = Player:GetMouse()
-        local UIS = game:GetService("UserInputService")
-        if clickTpEnabled and input.UserInputType == Enum.UserInputType.MouseButton1 and UIS:IsKeyDown(Enum.KeyCode.LeftControl) then
-           local Char = Player.Character
-           if Char then
-              Char:MoveTo(Mouse.Hit.p)
-           end
-        end
-     end
-
-
-     function noClip()
-        local player = game.Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local rootPart = character:FindFirstChild("HumanoidRootPart") or character.PrimaryPart
-    
-        local function isDescendantOfTerrain(part)
-            local terrain = game.Workspace.Terrain
-            return terrain and terrain:IsAncestorOf(part)
-        end
-    
-        game:GetService("RunService").Stepped:Connect(function()
-            if noClipEnabled then
-                for _, part in ipairs(character:GetDescendants()) do
-                    if part:IsA("BasePart") and not isDescendantOfTerrain(part) then
-                        part.CanCollide = false
-                    end
-                end
-            end
-        end)
-    end 
+    end)
+end 
 
 
 
 
-    -- Tabs
+-- Tabs
 
-    local FarmTab = Window:MakeTab({
-        Name = "Autofarm",
-        PremiumOnly = false
-    })
+local GeneralTab = Window:MakeTab({
+    Name = "General",
+    PremiumOnly = false
+})
 
-    local PlayerTab = Window:MakeTab({
-        Name = "Player",
-        PremiumOnly = false
-    })
+
+local FarmTab = Window:MakeTab({
+    Name = "Autofarm",
+    PremiumOnly = false
+})
+
+local PlayerTab = Window:MakeTab({
+    Name = "Player",
+    PremiumOnly = false
+})
 
 
 
 
 
 
-    -- Toggles
+-- Toggles
 
-    PlayerTab:AddToggle({
-        Name = "Control Click Teleport",
-        Callback = function(Value)
-            clickTpEnabled = Value
-            game:GetService("UserInputService").InputBegan:Connect(teleportLocalPlayer)
-          end    
-    })
+PlayerTab:AddToggle({
+    Name = "Control Click Teleport",
+    Callback = function(Value)
+        clickTpEnabled = Value
+        game:GetService("UserInputService").InputBegan:Connect(teleportLocalPlayer)
+      end    
+})
 
-    PlayerTab:AddToggle({
-        Name = "No Clip",
-        Callback = function(Value)
-            noClipEnabled = Value
-            noClip()
-          end    
-    })
+PlayerTab:AddToggle({
+    Name = "No Clip",
+    Callback = function(Value)
+        noClipEnabled = Value
+        noClip()
+      end    
+})
 
 
-    FarmTab:AddToggle({
-        Name = "Auto Farm",
-        Callback = function(Value)
-            getgenv().autoFarm = Value
-            if Value then 
-            autoFarm()
-          end    
+FarmTab:AddToggle({
+    Name = "Auto Farm",
+    Callback = function(Value)
+        getgenv().autoFarm = Value
+        if Value then 
+        autoFarm()
+      end    
 end
+})
+
+
+
+
+
+
+
+
+    -- Drop Downs
+
+
+    -- Buttons
+
+    GeneralTab:AddButton({
+        Name = "Bypass Anticheat",
+        Callback = function()
+            local reg = getreg()
+
+        for i, Function in next, reg do
+            if type(Function) == 'function' then
+                local info = getinfo(Function)
+    
+                if info.name == 'kick' then
+                if (hookfunction(info.func, function(...)end)) then
+                print'succesfully hooked kick'
+            else
+                print'failed to hook kick'
+        end
+    end
+end
+end
+          end    
+    })
+
+    GeneralTab:AddButton({
+        Name = "Go to End",
+        Callback = function()
+            game.Players.LocalPlayer.Character:PivotTo(workspace.tower.finishes.Finish:GetPivot())
+          end    
+    })
+
+    GeneralTab:AddButton({
+        Name = "Get All items",
+        Callback = function()
+            for _,e in pairs(game.Players.LocalPlayer.Backpack:GetDescendants()) do
+                if e:IsA("Tool") then
+                e:Destroy()
+                end
+                end
+                wait() 
+                for _,v in pairs(game.ReplicatedStorage.Gear:GetDescendants()) do
+                if v:IsA("Tool") then
+                local CloneThings = v:Clone()
+                wait()
+                CloneThings.Parent = game.Players.LocalPlayer.Backpack
+                end
+        end
+          end    
     })
 
 
-
-
-
-
-
-
-        -- Drop Downs
-
-
-        -- Buttons
-
-        FarmTab:AddButton({
-            Name = "Bypass Anticheat",
-            Callback = function()
-                local reg = getreg()
-
-            for i, Function in next, reg do
-                if type(Function) == 'function' then
-                    local info = getinfo(Function)
+    GeneralTab:AddButton({
+        Name = "God Mode",
+        Callback = function()
+            for i,v in pairs(game:GetService("Workspace"):GetDescendants()) do 
+            if v.Name == "kills" then 
+            v:Destroy()
+        end
         
-                    if info.name == 'kick' then
-                    if (hookfunction(info.func, function(...)end)) then
-                    print'succesfully hooked kick'
-                else
-                    print'failed to hook kick'
-            end
-        end
-    end
 end
-              end    
-        })
-
-        FarmTab:AddButton({
-            Name = "Go to End",
-            Callback = function()
-                game.Players.LocalPlayer.Character:PivotTo(workspace.tower.finishes.Finish:GetPivot())
-              end    
-        })
-
-        FarmTab:AddButton({
-            Name = "Get All items",
-            Callback = function()
-                for _,e in pairs(game.Players.LocalPlayer.Backpack:GetDescendants()) do
-                    if e:IsA("Tool") then
-                    e:Destroy()
-                    end
-                    end
-                    wait() 
-                    for _,v in pairs(game.ReplicatedStorage.Gear:GetDescendants()) do
-                    if v:IsA("Tool") then
-                    local CloneThings = v:Clone()
-                    wait()
-                    CloneThings.Parent = game.Players.LocalPlayer.Backpack
-                    end
-            end
-              end    
-        })
-
-
-        FarmTab:AddButton({
-            Name = "God Mode",
-            Callback = function()
-                for i,v in pairs(game:GetService("Workspace"):GetDescendants()) do 
-                if v.Name == "kills" then 
-                v:Destroy()
-            end
-            end
-        })
-
-
-
-        -- Sliders
-        PlayerTab:AddSlider({
-            Name = "Speed",
-            Min = 32,
-            Max = 600,
-            Default = 32,
-            Color = Color3.fromRGB(64,64,64),
-            Increment = 1,
-            ValueName = "Walk Speed",
-            Callback = function(Value)
-                walkSpeed(Value)
-            end    
-        })
-
-
-
+        
+end
+	})
     
+
+
+
+    -- Sliders
+    PlayerTab:AddSlider({
+        Name = "Speed",
+        Min = 32,
+        Max = 600,
+        Default = 32,
+        Color = Color3.fromRGB(64,64,64),
+        Increment = 1,
+        ValueName = "Walk Speed",
+        Callback = function(Value)
+            walkSpeed(Value)
+        end    
+    })
+
+
+
+
+
 
 OrionLib:Init()
