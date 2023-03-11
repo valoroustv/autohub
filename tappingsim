@@ -230,7 +230,7 @@
     EggsTab:AddDropdown({
         Name = "Select Egg",
         Default = "Starter Egg",
-        Options = {"Starter", "Wood Egg", "Jungle Egg", "Forest Egg", "Bee Egg", "Swamp Egg", "Snow Egg", "Desert Egg", "Death Egg", "Beach Egg", "Mine Egg", "Cloud Egg", "Coral Egg", "Dark Egg", "Deep Flamed Egg", "80M Egg"},
+        Options = {"Starter", "Wood Egg", "Jungle Egg", "Forest Egg", "Bee Egg", "Swamp Egg", "Snow Egg", "Desert Egg", "Death Egg", "Beach Egg", "Mine Egg", "Cloud Egg", "Coral Egg", "Dark Egg", "Deep Flamed Egg", "80M Egg", "85M Egg"},
         Callback = function(Value)
             getgenv().selectEgg = Value
         end    
